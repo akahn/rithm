@@ -31,40 +31,33 @@ module Rithm
   end
 
   def self.evaluate(stack)
-    result = 0
     current = State.new
 
     stack.each do |term|
       current << term
-      if current.ready?
-        result += current.compute
-        current = State.new
-      end
     end
 
-    return result
+    current.running
   end
 
   class State
+    attr_reader :running
+
     def initialize
+      @result = nil
+      @has_operator = false
       @terms = []
     end
 
     def <<(term)
-      if @terms.length == 3
-        raise ArgumentError.new("too many terms")
+      if @running == nil
+        @running = term
       end
 
       @terms << term
-    end
-
-    def ready?
-      @terms.length == 3
-    end
-
-    def compute
-      operant, operator, operand = @terms
-      operator.evaluate(operant, operand)
+      if @terms[-2].is_a?(Op)
+        @running = @terms[-2].evaluate(@running, term)
+      end
     end
   end
 
@@ -139,4 +132,5 @@ assert_equal(["44"], Rithm.parse("44").to_s)
 assert_equal(["3", "+", "1"], Rithm.parse("3 + 1").to_s)
 
 assert_equal(4, Rithm.calc("3 + 1"))
-# assert_equal(5, Rithm.calc("3 + 1 + 1"))
+assert_equal(6, Rithm.calc("10 - 4"))
+assert_equal(5, Rithm.calc("3 + 1 + 1"))
