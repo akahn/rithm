@@ -10,18 +10,28 @@ module Rithm
 
   def self.parse(expression)
     expr = Expr.new
+    root = expr
+    current = expr
 
     expression.each_char do |char|
       if char == " "
         next
       elsif char.to_i.to_s == char # Hacky integer test
-        if expr.last.is_a?(Int)
-          expr.last << char
+        if current.last.is_a?(Int)
+          current.last << char
         else
-          expr << Int.new(char)
+          current << Int.new(char)
         end
       elsif ['+','-','*','/'].include?(char)
-        expr << Op.new(char)
+        current << Op.new(char)
+      elsif char == "("
+        # Begin a nested expression
+        sub = Expr.new
+        expr << sub
+        current = sub
+      elsif char == ")"
+        # Close out this sub-expression
+        current = root
       else
         raise "unknown character: `#{char}`"
       end
@@ -111,8 +121,8 @@ module Rithm
     end
 
     def to_s
-      @expr.map do |expr|
-        expr.to_s
+      @expr.map do |term|
+        term.to_s
       end
     end
   end
@@ -130,6 +140,7 @@ end
 assert_equal([], Rithm.parse("").to_s)
 assert_equal(["44"], Rithm.parse("44").to_s)
 assert_equal(["3", "+", "1"], Rithm.parse("3 + 1").to_s)
+assert_equal(["3", "+", ["3", "*", "5"], "-", "1"], Rithm.parse("3 + (3 * 5) - 1").to_s)
 
 assert_equal(4, Rithm.calc("3 + 1"))
 assert_equal(6, Rithm.calc("10 - 4"))
