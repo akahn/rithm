@@ -31,7 +31,41 @@ module Rithm
   end
 
   def self.evaluate(stack)
-    raise "not implemented"
+    result = 0
+    current = State.new
+
+    stack.each do |term|
+      current << term
+      if current.ready?
+        result += current.compute
+        current = State.new
+      end
+    end
+
+    return result
+  end
+
+  class State
+    def initialize
+      @terms = []
+    end
+
+    def <<(term)
+      if @terms.length == 3
+        raise ArgumentError.new("too many terms")
+      end
+
+      @terms << term
+    end
+
+    def ready?
+      @terms.length == 3
+    end
+
+    def compute
+      operant, operator, operand = @terms
+      operator.evaluate(operant, operand)
+    end
   end
 
   class Int
@@ -46,6 +80,10 @@ module Rithm
     def to_s
       @int
     end
+
+    def to_i
+      @int.to_i
+    end
   end
 
   class Op
@@ -56,6 +94,10 @@ module Rithm
     def to_s
       @op
     end
+
+    def evaluate(operant, operand)
+      operant.to_i.send(self.to_s, operand.to_i)
+    end
   end
 
   class Expr
@@ -65,6 +107,10 @@ module Rithm
 
     def last
       @expr[-1]
+    end
+
+    def each(&blk)
+      @expr.each(&blk)
     end
 
     def <<(term)
@@ -91,5 +137,6 @@ end
 assert_equal([], Rithm.parse("").to_s)
 assert_equal(["44"], Rithm.parse("44").to_s)
 assert_equal(["3", "+", "1"], Rithm.parse("3 + 1").to_s)
-# assert_equal("4", Rithm.calc("3 + 1")
 
+assert_equal(4, Rithm.calc("3 + 1"))
+# assert_equal(5, Rithm.calc("3 + 1 + 1"))
