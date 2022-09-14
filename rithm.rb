@@ -148,5 +148,8 @@ assert_equal(["3", "+", ["3", "*", "5"], "-", "1"], Rithm.parse("3 + (3 * 5) - 1
 
 assert_equal(4, Rithm.calc("3 + 1"))
 assert_equal(6, Rithm.calc("10 - 4"))
+# Works:
+assert_equal(6, Rithm.calc("10 - (2 + 2)"))
+# Does not work:
 assert_equal(5, Rithm.calc("3 + 1 + 1"))
 assert_equal(17, Rithm.calc("3 + (3 * 5) - 1"))
