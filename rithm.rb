@@ -44,27 +44,6 @@ module Rithm
     expr.evaluate
   end
 
-  class State
-    attr_reader :running
-
-    def initialize
-      @result = nil
-      @has_operator = false
-      @terms = []
-    end
-
-    def <<(term)
-      if @running == nil
-        @running = term
-      end
-
-      @terms << term
-      if @terms[-2].is_a?(Op)
-        @running = @terms[-2].evaluate(@running, term)
-      end
-    end
-  end
-
   class Int
     def initialize(int)
       @int = int
@@ -95,10 +74,6 @@ module Rithm
     def to_s
       @op
     end
-
-    def evaluate(operant, operand)
-      operant.to_i.send(self.to_s, operand.to_i)
-    end
   end
 
   class Expr
@@ -108,10 +83,6 @@ module Rithm
 
     def last
       @expr[-1]
-    end
-
-    def each(&blk)
-      @expr.each(&blk)
     end
 
     def <<(term)
