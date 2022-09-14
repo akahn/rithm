@@ -40,14 +40,8 @@ module Rithm
     return expr
   end
 
-  def self.evaluate(stack)
-    current = State.new
-
-    stack.each do |term|
-      current << term
-    end
-
-    current.running
+  def self.evaluate(expr)
+    expr.evaluate
   end
 
   class State
@@ -87,6 +81,10 @@ module Rithm
     def to_i
       @int.to_i
     end
+
+    def evaluate
+      to_i
+    end
   end
 
   class Op
@@ -125,6 +123,12 @@ module Rithm
         term.to_s
       end
     end
+
+    def evaluate
+      a, op, b = @expr[0], @expr[1], @expr[2]
+
+      a.evaluate.send(op.to_s, b.evaluate)
+    end
   end
 end
 
@@ -145,3 +149,4 @@ assert_equal(["3", "+", ["3", "*", "5"], "-", "1"], Rithm.parse("3 + (3 * 5) - 1
 assert_equal(4, Rithm.calc("3 + 1"))
 assert_equal(6, Rithm.calc("10 - 4"))
 assert_equal(5, Rithm.calc("3 + 1 + 1"))
+assert_equal(17, Rithm.calc("3 + (3 * 5) - 1"))
